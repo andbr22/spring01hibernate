@@ -1,12 +1,16 @@
 package pl.coderslab.controller;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
+import javax.validation.Validator;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import pl.coderslab.dao.AuthorDao;
@@ -15,11 +19,16 @@ import pl.coderslab.dao.PublisherDao;
 import pl.coderslab.model.Author;
 import pl.coderslab.model.Book;
 import pl.coderslab.model.Publisher;
+import pl.coderslab.repository.AuthorRepository;
+import pl.coderslab.repository.BookRepository;
+import pl.coderslab.repository.PublisherRepository;
+import pl.coderslab.validator.PropositionGroup;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Controller
 @RequestMapping("/book")
@@ -30,6 +39,14 @@ public class BookController {
 	private PublisherDao publisherDao;
 	@Autowired
 	private AuthorDao authorDao;
+	@Autowired
+	Validator validator;
+	@Autowired
+	private BookRepository bookRepository;
+	@Autowired
+	private PublisherRepository publisherRepository;
+	@Autowired
+	private AuthorRepository authorRepository;
 
 	@ModelAttribute("publishers")
 	public List<Publisher> getPublishers(){
@@ -42,9 +59,30 @@ public class BookController {
 	}
 
 	@GetMapping("/test")
-	@ResponseBody
-	public String testBook(){
-		return "Test";
+	public String test(Model model){
+		Author author = authorDao.readById(1);
+		//List<Book> books = bookRepository.findAll();
+		//List<Book> books = bookRepository.findBooksByPublisherName("pub 2");
+		//List<Book> books = bookRepository.findBooksByAuthorsContaining(author);
+		List<Book> books = bookRepository.findAllByPublisherNameOrderByTitleDesc("pub 2");
+		model.addAttribute("books",books);
+		return "bookAll";
+	}
+
+	@GetMapping("/saveProposition")
+	public String ValidatePropositionForm(Model model){
+		model.addAttribute("book", new Book());
+		return "bookValidatorForm";
+	}
+	@PostMapping("/saveProposition")
+	public String validateProposition(@Validated({PropositionGroup.class}) Book book, BindingResult result) {
+		if(result.hasErrors()){
+			return "bookValidatorForm";
+		}
+
+		bookDao.create(book);
+
+		return "redirect:/book/read";
 	}
 
 	@GetMapping("/save")
@@ -55,6 +93,12 @@ public class BookController {
 
 	@PostMapping("/save")
 	public String validateBook(@Valid Book book, BindingResult result){
+
+		Set<ConstraintViolation<Book>> violations = validator.validate(book, PropositionGroup.class);
+		if(book.isProposition() && (!violations.isEmpty())){
+			return "bookValidatorForm";
+		}
+
 		if(result.hasErrors()){
 			return "bookValidatorForm";
 		}

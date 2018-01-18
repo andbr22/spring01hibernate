@@ -50,11 +50,13 @@ public class AuthorController {
         String lastName = request.getParameter("lastName");
         String email = request.getParameter("email");
         String pesel = request.getParameter("pesel");
+        String yearOfBirth = request.getParameter("yearOfBirth");
         Author author = new Author();
         author.setFirstName(firstName);
         author.setLastName(lastName);
         author.setPesel(pesel);
         author.setEmail(email);
+        author.setYearOfBirth(yearOfBirth);
         Set<ConstraintViolation<Author>> violations = validator.validate(author);
         model.addAttribute("author",author);
         if(!violations.isEmpty()) {
