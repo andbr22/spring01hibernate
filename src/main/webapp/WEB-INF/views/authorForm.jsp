@@ -17,6 +17,7 @@
         nazwisko:<input name="lastName" value="${author.lastName}"/><br/>
         email:<input name="email" value="${author.email}"/><br/>
         PESEL:<input name="pesel" value="${author.pesel}"/><br/>
+        Year of Birth:<input name="yearOfBirth" value="${author.yearOfBirth}"/><br/>
         <input type="submit"/>
     </form>
     <div>

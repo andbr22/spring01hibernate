@@ -15,6 +15,12 @@
     <form:form method="post" modelAttribute="book">
         Tytuł:<form:input path="title"/>
         <form:errors path="title"/>
+        Description:<form:input path="description"/>
+        <form:errors path="description"/>
+        <br>
+        <br>
+        Is Proposition:<form:checkbox path="proposition"/>
+        <form:errors path="proposition"/>
         <br>
         Authors:<form:select path="authors" items="${authors}" itemLabel="lastName" itemValue="id" multiple="true"/>
         <form:errors path="authors"/>
